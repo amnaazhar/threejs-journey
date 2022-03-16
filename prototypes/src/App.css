@@ -20,7 +20,7 @@ button {
   font-size: 20px;
   padding: 10px 24px;
   border-radius: 12px;
-  border: 2px solid #4CAF50;
+  border: 2px solid #738276;
   background-color: transparent;
   color: black;
   transition-duration: 0.4s;
@@ -29,7 +29,7 @@ button {
 }
 
 button:hover {
-  background-color: #4CAF50; /* Green */
+  background-color: #738276; /* Green */
   color: white;
 }
 
