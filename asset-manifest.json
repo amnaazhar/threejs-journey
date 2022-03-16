@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/react-gh-pages/static/css/main.d2c58b04.css",
-    "main.js": "/react-gh-pages/static/js/main.2692db26.js",
-    "static/js/787.f083dcd6.chunk.js": "/react-gh-pages/static/js/787.f083dcd6.chunk.js",
-    "index.html": "/react-gh-pages/index.html",
-    "main.d2c58b04.css.map": "/react-gh-pages/static/css/main.d2c58b04.css.map",
-    "main.2692db26.js.map": "/react-gh-pages/static/js/main.2692db26.js.map",
-    "787.f083dcd6.chunk.js.map": "/react-gh-pages/static/js/787.f083dcd6.chunk.js.map"
+    "main.css": "/threejs-journey/static/css/main.17c5b08a.css",
+    "main.js": "/threejs-journey/static/js/main.5e5b1a61.js",
+    "static/js/787.f083dcd6.chunk.js": "/threejs-journey/static/js/787.f083dcd6.chunk.js",
+    "index.html": "/threejs-journey/index.html",
+    "main.17c5b08a.css.map": "/threejs-journey/static/css/main.17c5b08a.css.map",
+    "main.5e5b1a61.js.map": "/threejs-journey/static/js/main.5e5b1a61.js.map",
+    "787.f083dcd6.chunk.js.map": "/threejs-journey/static/js/787.f083dcd6.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.d2c58b04.css",
-    "static/js/main.2692db26.js"
+    "static/css/main.17c5b08a.css",
+    "static/js/main.5e5b1a61.js"
   ]
 }
