@@ -1,10 +1,41 @@
 .App {
   text-align: center;
+  font-family: 'Trebuchet MS';
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.buttons{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  font-family: 'Trebuchet MS';
+  font-size: 20px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 2px solid #4CAF50;
+  background-color: transparent;
+  color: black;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  margin: 30px;
+}
+
+button:hover {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (prefers-reduced-motion: no-preference) {
