@@ -21,6 +21,10 @@ function App() {
     }
 
     window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', (event) =>
+    {
+      webglApp.current.mousemove(event.clientX, event.clientY)
+    })
 
   },[])
 
