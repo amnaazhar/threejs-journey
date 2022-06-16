@@ -33,6 +33,7 @@ class WebGLApp {
 
     constructor(parent){
         
+        this.angle = -2;
         //the main function
         this.params = {
             color: 0xff0000,
@@ -103,13 +104,38 @@ class WebGLApp {
         
         if (this.sphere != null){
 
-            var x = Math.ceil((this.sphere.position.x + window.innerWidth/4)/this.resolution) - 1
-            var y = Math.ceil((this.sphere.position.y + window.innerHeight/4)/this.resolution) - 1
+
+            //apply boundaries here
+
+            var x = Math.ceil((this.sphere.position.x + this.width/2)/this.resolution) - 1
+            var y = Math.ceil((this.sphere.position.y + this.height/2)/this.resolution) - 1
             
+            // helper code -- TODO: replace it with reading box values and applying it to particle
+            for (var m=0; m<this.array_of_boxes.length; m++){
+                for (var n=0; n<this.array_of_boxes.length; n++){
+
+                    var temp = this.array_of_boxes[m][n]
+                    //console.log(this.array_of_boxes)
+                    temp.material.color = new Color(0x00ff00)
+                    temp.material.needsUpdate = true
+                
+                }
+            }
             var temp = this.array_of_boxes[x][y]
             //console.log(this.array_of_boxes)
-            temp.material.color = new Color(0xff0000);
-            temp.material.needsUpdate = true;
+            temp.material.color = new Color(0xff0000)
+            temp.material.needsUpdate = true
+
+            // end of  helper code 
+
+
+            //just animating the sphere
+            this.angle+=0.5;
+            if(this.angle> 360){
+                this.angle=0;
+            }
+            this.sphere.position.x = Math.cos (this.angle * (Math.PI / 180)) * 120
+            this.sphere.position.y = Math.sin (this.angle * (Math.PI / 180)) * 120
         }
 
         this.renderer.render( this.scene, this.camera )
@@ -138,24 +164,33 @@ class WebGLApp {
         */
             var res = 50
             this.resolution = res
-            const width = window.innerWidth
-            const height = window.innerHeight
+            const width = 450
+            const height = 450
             var value;
+            this.width = width
+            this.height = height
+
             this.array_of_boxes = new Array();
-
-            this.sphere  = new Mesh(new SphereGeometry(10, 10, 32), new MeshBasicMaterial( {color: 0x0000ff} ))            
-            this.sphere.position.set(100, 200, 0)
+            console.log(width, height)
+            this.sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: 0x0000ff} ))            
+           // this.sphere.position.set(width/2, height/2, 10)
+           this.sphere.position.set(0, 0, 0)
             this.scene.add(this.sphere);
+            
+            var boundaryBox = new Mesh(new BoxGeometry(width, height, 1), new MeshBasicMaterial( {color: 0x000000, wireframe:true} ))
+           // boundaryBox.position.set(-res/2,-res/2,10)
+           boundaryBox.position.set(0,0,10)
+            this.scene.add (boundaryBox)   
 
-            for(var x = 0; x < width/2; x+=res ){
+            for(var x = 0; x < width; x+=res ){
                 //console.log(x/res)
                 this.array_of_boxes[x/res] = new Array();
-                for(var y = 0; y < height/2; y+=res){
+                for(var y = 0; y < height; y+=res){
                     
                     value = (x + y) * 0.01 * Math.PI * 2;
                     
                     var cube = new Mesh(new BoxGeometry(res, res, 1), new MeshBasicMaterial( {color: 0x00ff00, wireframe:true} ))
-                    cube.position.set(x - width/4, y -height/4 , 10);
+                    cube.position.set(x-width/2+res/2, y-height/2+res/2, 10);
                     this.scene.add( cube );
 
                     this.array_of_boxes[x/res][y/res] = cube
@@ -227,3 +262,16 @@ class WebGLApp {
 }
 
 export default WebGLApp;
+
+
+
+// for (x=0; x < width ; x +-3){
+
+//     for (y = 0 y <height ; y +=3){
+
+//         cube (3,3)
+//         cube.position (x,y)
+
+
+//     }
+// }
