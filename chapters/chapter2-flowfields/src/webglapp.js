@@ -107,35 +107,69 @@ class WebGLApp {
 
             //apply boundaries here
 
-            var x = Math.ceil((this.sphere.position.x + this.width/2)/this.resolution) - 1
-            var y = Math.ceil((this.sphere.position.y + this.height/2)/this.resolution) - 1
+            // var x = Math.ceil((this.sphere.position.x + this.width/2)/this.resolution) - 1
+            // var y = Math.ceil((this.sphere.position.y + this.height/2)/this.resolution) - 1
             
-            // helper code -- TODO: replace it with reading box values and applying it to particle
-            for (var m=0; m<this.array_of_boxes.length; m++){
-                for (var n=0; n<this.array_of_boxes.length; n++){
+            // // helper code -- TODO: replace it with reading box values and applying it to particle
+            // for (var m=0; m<this.array_of_boxes.length; m++){
+            //     for (var n=0; n<this.array_of_boxes.length; n++){
 
-                    var temp = this.array_of_boxes[m][n]
-                    //console.log(this.array_of_boxes)
-                    temp.material.color = new Color(0x00ff00)
-                    temp.material.needsUpdate = true
+            //         var temp = this.array_of_boxes[m][n]
+            //         //console.log(this.array_of_boxes)
+            //         temp.material.color = new Color(0x000000)
+            //         temp.material.needsUpdate = true
+
+            //        // this.sphere.
                 
-                }
-            }
-            var temp = this.array_of_boxes[x][y]
-            //console.log(this.array_of_boxes)
-            temp.material.color = new Color(0xff0000)
-            temp.material.needsUpdate = true
+            //     }
+            // }
+            // var temp = this.array_of_boxes[x][y]
+            // //console.log(this.array_of_boxes)
+            // temp.material.color = new Color(0xff0000)
+            // temp.material.needsUpdate = true
 
             // end of  helper code 
 
 
-            //just animating the sphere
-            this.angle+=0.5;
-            if(this.angle> 360){
-                this.angle=0;
-            }
-            this.sphere.position.x = Math.cos (this.angle * (Math.PI / 180)) * 120
-            this.sphere.position.y = Math.sin (this.angle * (Math.PI / 180)) * 120
+
+            //MOVING: just animating the sphere
+            // this.angle+=0.5;
+            // if(this.angle> 360){
+            //     this.angle=0;
+            // }
+            // this.sphere.position.x = Math.cos (this.angle * (Math.PI / 180)) * 120
+            // this.sphere.position.y = Math.sin (this.angle * (Math.PI / 180)) * 120
+            
+            //get value
+            // calculate new acceleration factor based on value direction
+            // and add that to point's velocity
+            var x = Math.ceil((this.p.x)/this.resolution)
+            var y = Math.ceil((this.p.y)/this.resolution)
+            console.log("Value of boxes is:", x, y)
+            console.log(this.array_of_dir.length)
+            console.log(this.p.x, this.p.y)
+            var value = this.array_of_dir[x][y]
+            this.p.vx += Math.cos(value) 
+            this.p.vy += Math.sin(value) 
+            this.p.x = x
+            this.p.y = y
+
+            this.p.x += this.p.vx;
+            this.p.y += this.p.vy;
+
+            // apply some friction so point doesn't speed up too much
+            this.p.vx *= 0.99;
+            this.p.vy *= 0.99;
+
+            // wrap around edges of screen
+            if(this.p.x > this.width) this.p.x = 0;
+            if(this.p.y > this.height) this.p.y = 0;
+            if(this.p.x < 0) this.p.x = this.width;
+            if(this.p.y < 0) this.p.y = this.height;
+
+
+            this.sphere.position.set(this.p.x, this.p.y)
+
         }
 
         this.renderer.render( this.scene, this.camera )
@@ -162,44 +196,74 @@ class WebGLApp {
             x = x + x_step     y = y + y_step }
         end_curve()
         */
-            var res = 50
+            var res = 25
             this.resolution = res
             const width = 450
             const height = 450
             var value;
             this.width = width
             this.height = height
+            
+            //make a point with position and velocity
+            this.p = {
+                x: Math.random() * this.width,
+                y: Math.random() * this.height,
+                vx: 0,
+                vy: 0
+            }
+
 
             this.array_of_boxes = new Array();
-            console.log(width, height)
-            this.sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: 0x0000ff} ))            
-           // this.sphere.position.set(width/2, height/2, 10)
-           this.sphere.position.set(0, 0, 0)
-            this.scene.add(this.sphere);
-            
-            var boundaryBox = new Mesh(new BoxGeometry(width, height, 1), new MeshBasicMaterial( {color: 0x000000, wireframe:true} ))
-           // boundaryBox.position.set(-res/2,-res/2,10)
-           boundaryBox.position.set(0,0,10)
-            this.scene.add (boundaryBox)   
+            this.array_of_dir = new Array();
+            console.log("P is ", this.p)
+            console.log("width height is", this.width, this.height)
+
+            //with triangles
 
             for(var x = 0; x < width; x+=res ){
                 //console.log(x/res)
+                this.array_of_dir[x/res] = new Array();
                 this.array_of_boxes[x/res] = new Array();
                 for(var y = 0; y < height; y+=res){
                     
-                    value = (x + y) * 0.01 * Math.PI * 2;
-                    
-                    var cube = new Mesh(new BoxGeometry(res, res, 1), new MeshBasicMaterial( {color: 0x00ff00, wireframe:true} ))
-                    cube.position.set(x-width/2+res/2, y-height/2+res/2, 10);
-                    this.scene.add( cube );
+                    value = Math.PI/6
 
-                    this.array_of_boxes[x/res][y/res] = cube
+                    const geometry = new ConeGeometry( 5, 25, 3 )
+                    const cone = new Mesh( geometry, new MeshBasicMaterial( {color: 0x000000, wireframe:true} ))
+                   
+                    //var cube = new Mesh(new BoxGeometry(res, res, 1), new MeshBasicMaterial( {color: 0x00ff00, wireframe:true} ))
+                    cone.position.set(x-width/2+res/2, y-height/2+res/2, 10)
+                    cone.rotateZ(value)
+                    this.scene.add( cone )
+
+                    this.array_of_dir [x/res][y/res] = value
+                    this.array_of_boxes[x/res][y/res] = cone
 
                 }
 
             }
+            this.sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: 0x0000ff} ))            
+            // this.sphere.position.set(width/2, height/2, 10)
+             this.sphere.position.set(this.p.x, this.p.y)
+             this.scene.add(this.sphere);
 
-            console.log(this.array_of_boxes.length)
+            //with rectangles
+            // for(var x = 0; x < width; x+=res ){
+            //     //console.log(x/res)
+            //     this.array_of_boxes[x/res] = new Array();
+            //     for(var y = 0; y < height; y+=res){
+                    
+            //         value = (x + y) * 0.01 * Math.PI * 2;
+                    
+            //         var cube = new Mesh(new BoxGeometry(res, res, 1), new MeshBasicMaterial( {color: 0x00ff00, wireframe:true} ))
+            //         cube.position.set(x-width/2+res/2, y-height/2+res/2, 10);
+            //         this.scene.add( cube );
+
+            //         this.array_of_boxes[x/res][y/res] = cube
+
+            //     }
+
+            // }
 
         // //scene
         // gui
