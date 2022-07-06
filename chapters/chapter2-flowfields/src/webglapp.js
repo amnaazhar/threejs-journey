@@ -23,11 +23,15 @@ import{
     DoubleSide,
     AmbientLight,
     PointLight,
-    PlaneGeometry
+    PlaneGeometry,
+    Fog
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'; 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
 
 class WebGLApp {
 
@@ -43,7 +47,11 @@ class WebGLApp {
        // const clock = new Clock()
         //set up scene
         this.scene = new Scene()
-        this.scene.background = new Color(this.params.backgroundColor);
+        //this.scene.background = new Color(this.params.backgroundColor);
+        //add fog for trail fade
+        //this.scene.background = new Color(this.params.backgroundColor);
+        this.scene.fog = new Fog( 0x000000, 1, 1000 );
+        // fog end
         this.camera = new PerspectiveCamera(75, aspect, 0.1, 1000)
 
         this.renderer = new WebGLRenderer({antialias:true})
@@ -62,16 +70,26 @@ class WebGLApp {
             y: 0
         }
 
+        // postprocessing
+
+        this.composer = new EffectComposer( this.renderer );
+        this.composer.addPass( new RenderPass( this.scene, this.camera ) );
+
+        this.afterimagePass = new AfterimagePass();
+        this.composer.addPass( this.afterimagePass );
+
         parent.appendChild(this.renderer.domElement)
         this.makeScene()
         this.animate()
+        this.createGUI()
 
-    }
+        }
 
     resize = (width, height) => {
         this.camera.aspect = width / height
         this.camera.updateProjectionMatrix()
         this.renderer.setSize(width, height)
+        this.composer.setSize(width, height);
         
     }
 
@@ -146,13 +164,12 @@ class WebGLApp {
             var x = Math.ceil((this.p.x)/this.resolution)
             var y = Math.ceil((this.p.y)/this.resolution)
             console.log("Value of boxes is:", x, y)
-            console.log(this.array_of_dir.length)
-            console.log(this.p.x, this.p.y)
-            var value = this.array_of_dir[x][y]
-            this.p.vx += Math.cos(value) 
-            this.p.vy += Math.sin(value) 
-            this.p.x = x
-            this.p.y = y
+            console.log("P.x: ", this.p.x,"P.y: ", this.p.y)
+            var value = this.array_of_dir[x-1][y-1]
+            this.p.vx += Math.cos(value) * -0.01
+            this.p.vy += Math.sin(value) * 0.01
+            //this.p.x = x
+            //this.p.y = y
 
             this.p.x += this.p.vx;
             this.p.y += this.p.vy;
@@ -162,20 +179,31 @@ class WebGLApp {
             this.p.vy *= 0.99;
 
             // wrap around edges of screen
-            if(this.p.x > this.width) this.p.x = 0;
-            if(this.p.y > this.height) this.p.y = 0;
+            if(this.p.x > this.width) this.p.x = 1;
+            if(this.p.y > this.height) this.p.y = 1;
             if(this.p.x < 0) this.p.x = this.width;
             if(this.p.y < 0) this.p.y = this.height;
 
 
-            this.sphere.position.set(this.p.x, this.p.y)
+            this.sphere.position.set(this.p.x - this.width/2, this.p.y - this.height/2)
 
         }
-
-        this.renderer.render( this.scene, this.camera )
+        this.composer.render();
+        //this.renderer.render( this.scene, this.camera )
         requestAnimationFrame( this.animate )
         this.controls.update();
     }
+
+    createGUI = () => {
+
+        const gui = new GUI();
+        gui
+            .add( this.afterimagePass.uniforms[ 'damp' ], 'value', 0, 1 )
+            .step( 0.001 )
+            .name('Afterimage Damp')
+
+    }
+
 
     makeScene = () => {
 
