@@ -32,6 +32,7 @@ import GUI from 'lil-gui';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
+import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 
 class WebGLApp {
 
@@ -81,6 +82,7 @@ class WebGLApp {
         //         y: 0
         // }
 
+        this.perlin = new ImprovedNoise();
 
         // Random Array
         this.colorsArray = [
@@ -274,7 +276,10 @@ class WebGLApp {
 
             for(var y = 0; y < this.height; y+=this.res){
                 
-                value = Math.PI/6
+                //value = Math.PI/6
+
+                value = this.perlin.noise( x * 6.5, y * 6.5, 6.5);
+                console.log("perlin noise ", value)
 
                 const geometry = new ConeGeometry( 5, 25, 3 )
                 const cone = new Mesh( geometry, new MeshBasicMaterial( {color: 0x000000, wireframe:true} ))
