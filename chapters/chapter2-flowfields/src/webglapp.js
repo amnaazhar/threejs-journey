@@ -1,10 +1,9 @@
+/* eslint-disable no-array-constructor */
 import{
     Scene,
     PerspectiveCamera,
-    DirectionalLight,
     Mesh,
     MeshBasicMaterial,
-    Vector3,
     PCFSoftShadowMap,
     Color,
     SphereGeometry,
@@ -148,27 +147,27 @@ class WebGLApp {
 
     moveParticle = (i) => {
 
-        var x = Math.ceil((this.particleArr [i].p.x)/this.res)-1
-        var y = Math.ceil((this.particleArr [i].p.y)/this.res)-1
+        var x = Math.ceil((this.particleArr[i].p.x)/this.res)-1
+        var y = Math.ceil((this.particleArr[i].p.y)/this.res)-1
         var value = this.array_of_dir[x][y]
 
-        this.particleArr [i].p.vx += Math.cos(value) * -0.01
-        this.particleArr [i].p.vy += Math.sin(value) * 0.01
+        this.particleArr[i].p.vx += Math.cos(value) * -0.01
+        this.particleArr[i].p.vy += Math.sin(value) * 0.01
 
-        this.particleArr [i].p.x +=  this.particleArr [i].p.vx;
-        this.particleArr [i].p.y +=  this.particleArr [i].p.vy;
+        this.particleArr[i].p.x +=  this.particleArr[i].p.vx;
+        this.particleArr[i].p.y +=  this.particleArr[i].p.vy;
 
         // apply some friction so point doesn't speed up too much
-        this.particleArr [i].p.vx *= 0.99;
-        this.particleArr [i].p.vy *= 0.99;
+        this.particleArr[i].p.vx *= 0.99;
+        this.particleArr[i].p.vy *= 0.99;
 
         // wrap around edges of screen - boundaries
-        if(this.particleArr [i].p.x > this.width) this.particleArr [i].p.x = 1;
-        if(this.particleArr [i].p.y > this.height) this.particleArr [i].p.y = 1;
-        if(this.particleArr [i].p.x < 0) this.particleArr [i].p.x = this.width;
-        if(this.particleArr [i].p.y < 0) this.particleArr [i].p.y = this.height;
+        if(this.particleArr[i].p.x > this.width) this.particleArr[i].p.x = 1;
+        if(this.particleArr[i].p.y > this.height) this.particleArr[i].p.y = 1;
+        if(this.particleArr[i].p.x < 0) this.particleArr[i].p.x = this.width;
+        if(this.particleArr[i].p.y < 0) this.particleArr[i].p.y = this.height;
 
-        this.particleArr [i].sphere.position.set(this.particleArr [i].p.x - this.width/2, this.particleArr [i].p.y - this.height/2)
+        this.particleArr[i].sphere.position.set(this.particleArr[i].p.x - this.width/2, this.particleArr[i].p.y - this.height/2)
 
     }
     
@@ -228,7 +227,7 @@ class WebGLApp {
 
                 value = this.perlin.noise( x * 0.65, y * 65, 0.65);
 
-                this.array_of_dir [x/this.res][y/this.res] = value * this.params.noise_value
+                this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
 
             }
         }
