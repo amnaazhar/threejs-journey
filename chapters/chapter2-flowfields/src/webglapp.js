@@ -12,7 +12,9 @@ import{
     AmbientLight,
     PointLight,
     Fog,
-    Group
+    Group,
+    TextureLoader,
+    PlaneGeometry
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -29,6 +31,7 @@ class WebGLApp {
         
         //the main function
 
+        this.ready = false
         // --- V A R S ----
         this.params = {
             color: 0xff0000,
@@ -134,7 +137,7 @@ class WebGLApp {
 
     animate = () => {
         
-        if (this.particleArr != null){
+        if (this.particleArr != null && this.ready){
             for(var i = 0; i < this.particleArr.length ; i++){
                 this.moveParticle(i)
             }
@@ -174,8 +177,13 @@ class WebGLApp {
 
     makeScene = () => {
 
+        this.fieldSetup();
+    }
+
+    fieldSetup = () => {
+
         //field setup
-        this.res = 25 // resolution
+        this.res = 10 // resolution
         this.width = 450 // flowfield width and height
         this.height = 450
         this.num_p = 25 // number of particles
@@ -205,17 +213,90 @@ class WebGLApp {
             
         }
 
-
         //making array to store field values
         this.array_of_boxes = new Array() // helper code to visualize field
         this.array_of_dir = new Array() // array with all the vectors of the field
 
-        //with wireframed cones to visualize
-
         //TO DO: data from perlin
-       // understanding the data
-       // get the debug working
-       // to the image
+        // understanding the data
+        // get the debug working
+        // to the image
+
+
+        this.drawImage("heart2.jpeg");
+
+    }
+
+    drawImage = (filename) => {
+
+		const loader = new TextureLoader();
+        
+		loader.load("/assets/textures/"+filename, ( texture ) => {
+			// read texture data
+		
+			// const canvas = document.createElement( 'canvas' );
+			// canvas.width = this.width;
+			// canvas.height = this.height;
+			
+			// this.context = canvas.getContext( '2d' );
+            // console.log(texture.image)
+			// this.context.drawImage( texture.image, 0, 0 );
+			
+			// const data = this.context.getImageData(368, 368, canvas.width, canvas.height);
+			// console.log( data.data[0] );
+			
+			// visualize the texture
+			
+			const geometry = new PlaneGeometry(this.width,this.width);
+			const material = new MeshBasicMaterial( { map: texture } );
+
+			const mesh = new Mesh( geometry, material );
+            mesh.position.set(0,0,10)
+            mesh.rotation.set(Math.PI,0, Math.PI)
+			this.scene.add( mesh );
+
+        }, 
+        // onProgress callback currently not supported
+        undefined,
+    
+        // onError callback
+        function ( err ) {
+            console.error( 'An error happened.' );
+        } );
+
+        // read texture data
+        const myImg = new Image();
+        myImg.crossOrigin = "Anonymous";
+
+
+        
+        myImg.onload = () => {
+
+            const canvas = document.createElement( 'canvas' );
+            canvas.width = this.width;
+            canvas.height = this.height;
+            const context = canvas.getContext('2d');
+            context.drawImage(myImg, 0, 0);
+            // const data = context.getImageData(368, 368, this.width, this.height);
+            // console.log(data.data)
+            this.pixelData(context);
+
+        }
+
+        myImg.src = "assets/textures/"+filename;
+    }
+
+    pixelData = (imgData) => {
+
+        // for (var i = 0; i < imgData.data.length; i += 4) {
+        //     imgData.data[i] = 255-imgData.data[i]; // red
+        //     // imgData.data[i + 1] = 255-imgData.data[i + 1]; //blue
+        //     // imgData.data[i + 2] = 255-imgData.data[i + 2]; //green
+        //     // imgData.data[i + 3] = 255; // alpha
+        //   }
+        this.context = imgData;
+        const data = this.context.getImageData(368, 368, this.width, this.height);
+        console.log(data.data[0])
 
         var value; // for field
         for(var x = 0; x < this.width; x+=this.res ){
@@ -225,9 +306,16 @@ class WebGLApp {
 
             for(var y = 0; y < this.height; y+=this.res){
 
-                value = this.perlin.noise( x * 0.65, y * 65, 0.65);
+                //value = this.perlin.noise( x * 0.65, y * 65, 0.65);
 
-                this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+                console.log("field" + this.context.getImageData(x, y, this.width, this.height).data[0])
+                if((this.context.getImageData(x, y, this.width, this.height).data[0]) > 0){
+                    value = -1
+                }else{
+                    value = 1
+                }
+                //this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+                this.array_of_dir[x/this.res][y/this.res] = value
 
             }
         }
@@ -249,16 +337,18 @@ class WebGLApp {
 
                 const geometry = new ConeGeometry( 1, 25, 1 )
                 const cone = new Mesh( geometry, new MeshBasicMaterial( {color: 0xffffff, wireframe:true} )) //white color
-                cone.position.set(x-this.width/2+this.res/2, y-this.height/2+this.res/2, 10)
+                cone.position.set(x-this.width/2+this.res/2, y-this.height/2+this.res/2, -5)
                 cone.rotateZ(angle)
                 this.field_lines.add(cone)
 
             }
         }
         //field lines needs to be rotated horizontally to go from ' | ' to ' __ '
-        this.field_lines.rotateZ (Math.PI/2)
+       // this.field_lines.rotateZ (Math.PI/2)
 
         this.showField();
+
+        this.ready = true;
 
     }
 
