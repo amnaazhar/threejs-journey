@@ -13,14 +13,17 @@ import{
     PointLight,
     Fog,
     Group,
-    Clock
+    PlaneBufferGeometry,
+    LineSegments,
+    WireframeGeometry,
+    LineBasicMaterial,
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'; 
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
+// import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+// import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass.js';
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import colors from './colors.js'
 
@@ -45,7 +48,6 @@ class WebGLApp {
         //this.clock = new Clock();
         // ---- BASIC SCENE SETUP----
         const aspect = window.innerWidth / window.innerHeight
-        // const clock = new Clock()
        
         //scene
         this.scene = new Scene()
@@ -68,19 +70,13 @@ class WebGLApp {
         parent.appendChild(this.renderer.domElement)
 
         // postprocessing
-        this.composer = new EffectComposer( this.renderer );
-        this.composer.addPass( new RenderPass( this.scene, this.camera));
-        this.afterimagePass = new AfterimagePass();
-        this.composer.addPass( this.afterimagePass );
+        // this.composer = new EffectComposer( this.renderer );
+        // this.composer.addPass( new RenderPass( this.scene, this.camera));
+        // this.afterimagePass = new AfterimagePass();
+        // this.composer.addPass( this.afterimagePass );
 
         // controls set up
         this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-       
-        //for cursor interaction
-        // this.cursor = {
-        //         x: 0,
-        //         y: 0
-        // }
 
         //call init function here
         this.addLights()
@@ -136,17 +132,41 @@ class WebGLApp {
 
 
     animate = () => {
-        
-        if (this.particleArr != null && this.array_of_dir != null && this.field_lines != null){
-            if(this.params.animatefield) this.animateField();
-            for(var i = 0; i < this.particleArr.length ; i++){
-                this.moveParticle(i)
-            }
-        }
 
-        this.composer.render();
+
+        this.delta += 0.0025
+        // if (this.particleArr != null && this.array_of_dir != null && this.field_lines != null){
+        //     if(this.params.animatefield) this.animateField();
+        //     for(var i = 0; i < this.particleArr.length ; i++){
+        //         this.moveParticle(i)
+        //     }
+        // }
+
+        if(this.line){
+            this.updateVertices(this.line);
+        }
+        this.renderer.render( this.scene, this.camera )
+        //this.composer.render();
         requestAnimationFrame( this.animate )
         this.controls.update();
+    }
+
+    makeGeometry = () => {
+        var geometry = new PlaneBufferGeometry(this.width, this.height, 25,25)
+        this.line = new LineSegments(new WireframeGeometry(geometry), new LineBasicMaterial({color: 0xffffff}))
+        this.line.rotation.x = Math.PI/4
+        this.scene.add(this.line)
+
+    }
+
+    updateVertices(geom){
+
+        var vertices = geom.geometry.attributes.position.array;
+        //console.log(Math.random())
+        for(var i = 0; i<=vertices.length;i+=3){
+            vertices[i+2] = this.perlin.noise (vertices[i]/800 + this.delta, vertices[i+1]/800 + this.delta, 0.65) *300
+        }
+        geom.geometry.attributes.position.needsUpdate = true;
     }
 
     moveParticle = (i) => {
@@ -184,59 +204,61 @@ class WebGLApp {
         this.height = 450
         this.num_p = 25 // number of particles
         
+        this.makeGeometry();
+
         //make an array of particles with position and velocity
-        this.particleArr = new Array()
+    //     this.particleArr = new Array()
 
-        for (var i = 0; i < this.num_p; i++){
+    //     for (var i = 0; i < this.num_p; i++){
 
-            var p = {
-                x: Math.random() * this.width,
-                y: Math.random() * this.height,
-                vx: 0,
-                vy: 0
-            }
+    //         var p = {
+    //             x: Math.random() * this.width,
+    //             y: Math.random() * this.height,
+    //             vx: 0,
+    //             vy: 0
+    //         }
 
-            var color = this.getRandomColor()
-            var sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: color} ))
-            sphere.position.set(p.x, p.y)
-            this.scene.add(sphere);
+    //         var color = this.getRandomColor()
+    //         var sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: color} ))
+    //         sphere.position.set(p.x, p.y)
+    //         this.scene.add(sphere);
 
-            var particle = {
-                p:p, sphere:sphere
-            }
+    //         var particle = {
+    //             p:p, sphere:sphere
+    //         }
 
-            this.particleArr[i] = particle
+    //         this.particleArr[i] = particle
             
-        }
+    //     }
 
 
-        //making array to store field values
-        this.array_of_boxes = new Array() // helper code to visualize field
-        this.array_of_dir = new Array() // array with all the vectors of the field
+    //     //making array to store field values
+    //     this.array_of_boxes = new Array() // helper code to visualize field
+    //     this.array_of_dir = new Array() // array with all the vectors of the field
 
-        //with wireframed cones to visualize
+    //     //with wireframed cones to visualize
 
-        //TO DO: data from perlin
-       // understanding the data
-       // get the debug working
-       // to the image
+    //     //TO DO: data from perlin
+    //    // understanding the data
+    //    // get the debug working
+    //    // to the image
 
-        var value; // for field
-        for(var x = 0; x < this.width; x+=this.res ){
-            //console.log(x/res)
-            this.array_of_dir[x/this.res] = new Array();
-            this.array_of_boxes[x/this.res] = new Array();
+    //     var value; // for field
+    //     for(var x = 0; x < this.width; x+=this.res ){
+    //         //console.log(x/res)
+    //         this.array_of_dir[x/this.res] = new Array();
+    //         this.array_of_boxes[x/this.res] = new Array();
 
-            for(var y = 0; y < this.height; y+=this.res){
+    //         for(var y = 0; y < this.height; y+=this.res){
 
-                value = this.perlin.noise( x * 0.65, y * 65, 0.65);
+    //             value = this.perlin.noise( x * 0.65, y * 65, 0.65);
 
-                this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+    //             this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
 
-            }
-        }
+    //         }
+    //     }
 
-        this.makeField();
+    //     this.makeField();
     }
 
     makeField = () => {
@@ -279,32 +301,32 @@ class WebGLApp {
         for(var x = 0; x < this.width; x+=this.res ){
             for(var y = 0; y < this.height; y+=this.res){
 
-                value = this.perlin.noise( x /300 + this.delta, y /300 + this.delta, 65);
+                value = this.perlin.noise( x * 0.65, y * 65, this.delta);
 
                 this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
                 this.field_lines.children[num].rotateZ(value * this.params.noise_value)
                 num++
             }
         }
-        this.delta+= 0.0005
+        this.delta+= 0.00005
     }
     
 
     createGUI = () => {
 
         const gui = new GUI();
-        gui
-            .add( this.afterimagePass.uniforms[ 'damp' ], 'value', 0, 1 )
-            .step( 0.001 )
-            .name('PostProcessing Damp')
-        gui
-            .add(this.params, "showfield")
-            .onChange(this.showField)
-            .name('Show field')
-        gui
-            .add(this.params, "animatefield")
-            .onChange(this.animateField)
-            .name('Animate field')
+        // gui
+        //     .add( this.afterimagePass.uniforms[ 'damp' ], 'value', 0, 1 )
+        //     .step( 0.001 )
+        //     .name('PostProcessing Damp')
+        // gui
+        //     .add(this.params, "showfield")
+        //     .onChange(this.showField)
+        //     .name('Show field')
+        // gui
+        //     .add(this.params, "animatefield")
+        //     .onChange(this.animateField)
+        //     .name('Animate field')
         // gui
         //     .add(this.params, "noise_value" , 'value', 0, 5)
         //     .step( 0.1 )
