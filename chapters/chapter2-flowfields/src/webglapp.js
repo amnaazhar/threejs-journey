@@ -12,7 +12,8 @@ import{
     AmbientLight,
     PointLight,
     Fog,
-    Group
+    Group,
+    Clock
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -39,7 +40,8 @@ class WebGLApp {
         this.colorsArray = colors()
         this.switch_field = false
         this.perlin = new ImprovedNoise()
-    
+        this.delta=0
+        //this.clock = new Clock();
         // ---- BASIC SCENE SETUP----
         const aspect = window.innerWidth / window.innerHeight
         // const clock = new Clock()
@@ -134,7 +136,21 @@ class WebGLApp {
 
     animate = () => {
         
-        if (this.particleArr != null){
+        if (this.particleArr != null && this.array_of_dir != null && this.field_lines != null){
+            let value;
+            let num=0;
+            for(var x = 0; x < this.width; x+=this.res ){
+                for(var y = 0; y < this.height; y+=this.res){
+    
+                    value = this.perlin.noise( x * 0.65, y * 65, this.delta);
+    
+                    this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+                    this.field_lines.children[num].rotateZ(value * this.params.noise_value)
+                    num++
+                }
+            }
+            this.delta+= 0.00005
+            console.log(this.delta)
             for(var i = 0; i < this.particleArr.length ; i++){
                 this.moveParticle(i)
             }
@@ -151,7 +167,7 @@ class WebGLApp {
         var y = Math.ceil((this.particleArr[i].p.y)/this.res)-1
         var value = this.array_of_dir[x][y]
 
-        this.particleArr[i].p.vx += Math.cos(value) * -0.01
+        this.particleArr[i].p.vx += Math.cos(value) * -0.01 
         this.particleArr[i].p.vy += Math.sin(value) * 0.01
 
         this.particleArr[i].p.x +=  this.particleArr[i].p.vx;
