@@ -34,7 +34,8 @@ class WebGLApp {
         this.params = {
             color: 0xff0000,
             backgroundColor: 0xe2f0f9,
-            field: true,
+            showfield: true,
+            animatefield: false,
             noise_value: 2
         }
         this.colorsArray = colors()
@@ -137,20 +138,7 @@ class WebGLApp {
     animate = () => {
         
         if (this.particleArr != null && this.array_of_dir != null && this.field_lines != null){
-            let value;
-            let num=0;
-            for(var x = 0; x < this.width; x+=this.res ){
-                for(var y = 0; y < this.height; y+=this.res){
-    
-                    value = this.perlin.noise( x * 0.65, y * 65, this.delta);
-    
-                    this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
-                    this.field_lines.children[num].rotateZ(value * this.params.noise_value)
-                    num++
-                }
-            }
-            this.delta+= 0.00005
-            console.log(this.delta)
+            if(this.params.animatefield) this.animateField();
             for(var i = 0; i < this.particleArr.length ; i++){
                 this.moveParticle(i)
             }
@@ -280,8 +268,25 @@ class WebGLApp {
 
     showField = () => {
 
-        if(this.params.field) this.scene.add(this.field_lines)
+        if(this.params.showfield) this.scene.add(this.field_lines)
         else this.scene.remove(this.field_lines)
+
+    }
+
+    animateField = () => {
+            let value;
+            let num=0;
+            for(var x = 0; x < this.width; x+=this.res ){
+                for(var y = 0; y < this.height; y+=this.res){
+    
+                    value = this.perlin.noise( x * 0.65, y * 65, this.delta);
+    
+                    this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+                    this.field_lines.children[num].rotateZ(value * this.params.noise_value)
+                    num++
+                }
+            }
+            this.delta+= 0.00005
 
     }
     
@@ -294,9 +299,13 @@ class WebGLApp {
             .step( 0.001 )
             .name('PostProcessing Damp')
         gui
-            .add(this.params, "field")
+            .add(this.params, "showfield")
             .onChange(this.showField)
             .name('Show field')
+        gui
+            .add(this.params, "animatefield")
+            .onChange(this.animateField)
+            .name('Animate field')
         // gui
         //     .add(this.params, "noise_value" , 'value', 0, 5)
         //     .step( 0.1 )
