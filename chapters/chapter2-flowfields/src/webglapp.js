@@ -274,20 +274,19 @@ class WebGLApp {
     }
 
     animateField = () => {
-            let value;
-            let num=0;
-            for(var x = 0; x < this.width; x+=this.res ){
-                for(var y = 0; y < this.height; y+=this.res){
-    
-                    value = this.perlin.noise( x * 0.65, y * 65, this.delta);
-    
-                    this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
-                    this.field_lines.children[num].rotateZ(value * this.params.noise_value)
-                    num++
-                }
-            }
-            this.delta+= 0.00005
+        let value;
+        let num=0;
+        for(var x = 0; x < this.width; x+=this.res ){
+            for(var y = 0; y < this.height; y+=this.res){
 
+                value = this.perlin.noise( x * 0.65, y * 65, this.delta);
+
+                this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
+                this.field_lines.children[num].rotateZ(value * this.params.noise_value)
+                num++
+            }
+        }
+        this.delta+= 0.00005
     }
     
 
