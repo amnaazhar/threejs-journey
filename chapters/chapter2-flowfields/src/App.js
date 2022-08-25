@@ -1,4 +1,5 @@
 import './App.css';
+import './canvas.css';
 import React, {useEffect, useRef} from "react"
 import WebGLApp from "./webglapp";
 

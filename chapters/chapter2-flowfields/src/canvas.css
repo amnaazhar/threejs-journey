@@ -1,0 +1,11 @@
+
+canvas {
+    position: absolute;
+    z-index: 99;
+    display: none;
+    margin: 0 auto;
+}
+
+img {
+    rotate: 90;
+}

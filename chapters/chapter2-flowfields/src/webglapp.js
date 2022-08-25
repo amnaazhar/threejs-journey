@@ -154,24 +154,47 @@ class WebGLApp {
         var y = Math.ceil((this.particleArr[i].p.y)/this.res)-1
         var value = this.array_of_dir[x][y]
 
-        this.particleArr[i].p.vx += Math.cos(value) * -0.01
-        this.particleArr[i].p.vy += Math.sin(value) * 0.01
+        if(value>-100){
+            this.particleArr[i].p.vx += Math.cos(value) * -0.01
+            this.particleArr[i].p.vy += Math.sin(value) * 0.01
 
-        this.particleArr[i].p.x +=  this.particleArr[i].p.vx;
-        this.particleArr[i].p.y +=  this.particleArr[i].p.vy;
+            this.particleArr[i].p.x +=  this.particleArr[i].p.vx;
+            this.particleArr[i].p.y +=  this.particleArr[i].p.vy;
 
-        // apply some friction so point doesn't speed up too much
-        this.particleArr[i].p.vx *= 0.99;
-        this.particleArr[i].p.vy *= 0.99;
+            // apply some friction so point doesn't speed up too much
+            this.particleArr[i].p.vx *= 0.99;
+            this.particleArr[i].p.vy *= 0.99;
 
-        // wrap around edges of screen - boundaries
-        if(this.particleArr[i].p.x > this.width) this.particleArr[i].p.x = 1;
-        if(this.particleArr[i].p.y > this.height) this.particleArr[i].p.y = 1;
-        if(this.particleArr[i].p.x < 0) this.particleArr[i].p.x = this.width;
-        if(this.particleArr[i].p.y < 0) this.particleArr[i].p.y = this.height;
+            // wrap around edges of screen - boundaries
+            if(this.particleArr[i].p.x > this.width) this.particleArr[i].p.x = 1;
+            if(this.particleArr[i].p.y > this.height) this.particleArr[i].p.y = 1;
+            if(this.particleArr[i].p.x < 0) this.particleArr[i].p.x = this.width;
+            if(this.particleArr[i].p.y < 0) this.particleArr[i].p.y = this.height;
 
-        this.particleArr[i].sphere.position.set(this.particleArr[i].p.x - this.width/2, this.particleArr[i].p.y - this.height/2)
+            this.particleArr[i].sphere.position.set(this.particleArr[i].p.x - this.width/2, this.particleArr[i].p.y - this.height/2)
+        }else{
 
+            this.particleArr.splice(i,1);
+
+            var p = {
+                x: Math.random() * this.width,
+                y: Math.random() * this.height,
+                vx: 0,
+                vy: 0
+            }
+
+            var color = this.getRandomColor()
+            var sphere  = new Mesh(new SphereGeometry(5, 5, 32), new MeshBasicMaterial( {color: color} ))
+            sphere.position.set(p.x, p.y)
+            this.scene.add(sphere);
+
+            var particle = {
+                p:p, sphere:sphere
+            }
+
+            this.particleArr.push(particle);
+
+        }
     }
     
 
@@ -229,40 +252,40 @@ class WebGLApp {
 
     drawImage = (filename) => {
 
-		const loader = new TextureLoader();
+		// const loader = new TextureLoader();
         
-		loader.load("/assets/textures/"+filename, ( texture ) => {
-			// read texture data
+		// loader.load("/assets/textures/"+filename, ( texture ) => {
+		// 	// read texture data
 		
-			// const canvas = document.createElement( 'canvas' );
-			// canvas.width = this.width;
-			// canvas.height = this.height;
+		// 	// const canvas = document.createElement( 'canvas' );
+		// 	// canvas.width = this.width;
+		// 	// canvas.height = this.height;
 			
-			// this.context = canvas.getContext( '2d' );
-            // console.log(texture.image)
-			// this.context.drawImage( texture.image, 0, 0 );
+		// 	// this.context = canvas.getContext( '2d' );
+        //     // console.log(texture.image)
+		// 	// this.context.drawImage( texture.image, 0, 0 );
 			
-			// const data = this.context.getImageData(368, 368, canvas.width, canvas.height);
-			// console.log( data.data[0] );
+		// 	// const data = this.context.getImageData(368, 368, canvas.width, canvas.height);
+		// 	// console.log( data.data[0] );
 			
-			// visualize the texture
+		// 	// visualize the texture
 			
-			const geometry = new PlaneGeometry(this.width,this.width);
-			const material = new MeshBasicMaterial( { map: texture } );
+		// 	// const geometry = new PlaneGeometry(this.width,this.width);
+		// 	// const material = new MeshBasicMaterial( { map: texture } );
 
-			const mesh = new Mesh( geometry, material );
-            mesh.position.set(0,0,10)
-            mesh.rotation.set(Math.PI,0, Math.PI)
-			this.scene.add( mesh );
+		// 	// const mesh = new Mesh( geometry, material );
+        //     // mesh.position.set(0,0,10)
+        //     // mesh.rotation.set(Math.PI,0, Math.PI)
+		// 	// this.scene.add( mesh );
 
-        }, 
-        // onProgress callback currently not supported
-        undefined,
+        // }, 
+        // // onProgress callback currently not supported
+        // undefined,
     
-        // onError callback
-        function ( err ) {
-            console.error( 'An error happened.' );
-        } );
+        // // onError callback
+        // function ( err ) {
+        //     console.error( 'An error happened.' );
+        // } );
 
         // read texture data
         const myImg = new Image();
@@ -273,9 +296,13 @@ class WebGLApp {
         myImg.onload = () => {
 
             const canvas = document.createElement( 'canvas' );
+            //canvas.className = '2Dcanvas';
+            document.body.appendChild(canvas);
+            //add canvas -> position absolute z-index
             canvas.width = this.width;
             canvas.height = this.height;
             const context = canvas.getContext('2d');
+            //context.rotate(-Math.PI/2);
             context.drawImage(myImg, 0, 0);
             // const data = context.getImageData(368, 368, this.width, this.height);
             // console.log(data.data)
@@ -295,7 +322,7 @@ class WebGLApp {
         //     // imgData.data[i + 3] = 255; // alpha
         //   }
         this.context = imgData;
-        const data = this.context.getImageData(368, 368, this.width, this.height);
+        const data = this.context.getImageData(0, 0, this.width, this.height);
         console.log(data.data[0])
 
         var value; // for field
@@ -305,14 +332,16 @@ class WebGLApp {
             this.array_of_boxes[x/this.res] = new Array();
 
             for(var y = 0; y < this.height; y+=this.res){
-
+                //normalize the lumonosity from -1 to 1
+                //store the data in arr of directions
+                //Math.sign()
                 //value = this.perlin.noise( x * 0.65, y * 65, 0.65);
 
-                console.log("field" + this.context.getImageData(x, y, this.width, this.height).data[0])
+                //console.log("field" + this.context.getImageData(x, y, this.width, this.height).data[0])
                 if((this.context.getImageData(x, y, this.width, this.height).data[0]) > 0){
-                    value = -1
+                    value = -100
                 }else{
-                    value = 1
+                    value = this.perlin.noise( x/500, y/500, 0.65)* this.params.noise_value;
                 }
                 //this.array_of_dir[x/this.res][y/this.res] = value * this.params.noise_value
                 this.array_of_dir[x/this.res][y/this.res] = value
@@ -334,17 +363,17 @@ class WebGLApp {
                 
                 angle = this.array_of_dir[x/this.res][y/this.res]
                 //console.log("show field ", angle)
-
-                const geometry = new ConeGeometry( 1, 25, 1 )
-                const cone = new Mesh( geometry, new MeshBasicMaterial( {color: 0xffffff, wireframe:true} )) //white color
-                cone.position.set(x-this.width/2+this.res/2, y-this.height/2+this.res/2, -5)
-                cone.rotateZ(angle)
-                this.field_lines.add(cone)
-
+                if(angle>-100){
+                    const geometry = new ConeGeometry( 1, 25, 1 )
+                    const cone = new Mesh( geometry, new MeshBasicMaterial( {color: 0xffffff, wireframe:true} )) //white color
+                    cone.position.set(x-this.width/2+this.res/2, y-this.height/2+this.res/2, -5)
+                    cone.rotateZ(angle)
+                    this.field_lines.add(cone)
+                }
             }
         }
         //field lines needs to be rotated horizontally to go from ' | ' to ' __ '
-       // this.field_lines.rotateZ (Math.PI/2)
+        //this.field_lines.rotateZ (Math.PI/2)
 
         this.showField();
 
